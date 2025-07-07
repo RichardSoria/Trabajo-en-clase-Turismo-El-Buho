@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Supabase Upload App',
+      title: '"El Búho" Turismo Ciudadano Ecuador',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const AuthGate(),
     );
@@ -92,13 +92,10 @@ class AuthGate extends StatelessWidget {
         final session = Supabase.instance.client.auth.currentSession;
 
         if (session != null) {
-          return FutureBuilder(
-            future: verificarYRedirigirSegunRol(context),
-            builder: (context, snapshot) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            },
+          // Verificar y redirigir según el rol del usuario
+          verificarYRedirigirSegunRol(context);
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
           );
         } else {
           return const LoginPage();

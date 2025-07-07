@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'resenas_pages.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TurismosPage extends StatefulWidget {
   const TurismosPage({super.key});
@@ -23,7 +23,6 @@ class _TurismosPageState extends State<TurismosPage> {
   final TextEditingController fotoController = TextEditingController();
   final TextEditingController latController = TextEditingController();
   final TextEditingController lngController = TextEditingController();
-  final TextEditingController autorController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> _pickImage(bool fromCamera) async {
@@ -43,9 +42,9 @@ class _TurismosPageState extends State<TurismosPage> {
         return;
       }
 
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('turismo/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final ref = FirebaseStorage.instance.ref().child(
+        'turismo/${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
 
       await ref.putFile(file);
       final url = await ref.getDownloadURL();
@@ -62,15 +61,36 @@ class _TurismosPageState extends State<TurismosPage> {
         final lat = double.tryParse(latController.text) ?? 0.0;
         final lng = double.tryParse(lngController.text) ?? 0.0;
         final ubicacion = GeoPoint(lat, lng);
+        final user = Supabase.instance.client.auth.currentUser;
 
-        await turismosRef.add({
-          'nombre': nombreController.text,
-          'descripcion': descripcionController.text,
-          'foto': fotoController.text,
-          'ubicacion': ubicacion,
-          'autor': autorController.text,
-          'fecha': Timestamp.now(),
-        });
+        if (user == null) {
+          _showSnackBar('Usuario no autenticado');
+          return;
+        }
+
+        try {
+          final data = await Supabase.instance.client
+              .from('users')
+              .select(
+                'name, lastName',
+              )
+              .eq('id', user.id)
+              .single();
+
+          final String name = '${data['name'] ?? ''} ${data['lastName'] ?? ''}';
+
+          await turismosRef.add({
+            'nombre': nombreController.text,
+            'descripcion': descripcionController.text,
+            'foto': fotoController.text,
+            'ubicacion': ubicacion,
+            'autor': name,
+            'fecha': Timestamp.now(),
+          });
+        } catch (e) {
+          _showSnackBar('Error al obtener el nombre del usuario: $e');
+          return;
+        }
 
         _clearForm();
         _showSnackBar('Turismo guardado correctamente');
@@ -86,7 +106,6 @@ class _TurismosPageState extends State<TurismosPage> {
     fotoController.clear();
     latController.clear();
     lngController.clear();
-    autorController.clear();
   }
 
   void _showSnackBar(String msg) {
@@ -96,9 +115,7 @@ class _TurismosPageState extends State<TurismosPage> {
   void _verResenas(String turismoId) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => ResenasPage(lugarId: turismoId),
-      ),
+      MaterialPageRoute(builder: (_) => ResenasPage(lugarId: turismoId)),
     );
   }
 
@@ -116,17 +133,31 @@ class _TurismosPageState extends State<TurismosPage> {
                 children: [
                   _buildTextField(nombreController, 'Nombre'),
                   const SizedBox(height: 12),
-                  _buildTextField(descripcionController, 'Descripción', maxLines: 3),
+                  _buildTextField(
+                    descripcionController,
+                    'Descripción',
+                    maxLines: 3,
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildTextField(latController, 'Latitud', isNumber: true)),
+                      Expanded(
+                        child: _buildTextField(
+                          latController,
+                          'Latitud',
+                          isNumber: true,
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Expanded(child: _buildTextField(lngController, 'Longitud', isNumber: true)),
+                      Expanded(
+                        child: _buildTextField(
+                          lngController,
+                          'Longitud',
+                          isNumber: true,
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildTextField(autorController, 'Autor'),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -154,7 +185,9 @@ class _TurismosPageState extends State<TurismosPage> {
             ),
             const Divider(height: 32),
             StreamBuilder<QuerySnapshot>(
-              stream: turismosRef.orderBy('fecha', descending: true).snapshots(),
+              stream: turismosRef
+                  .orderBy('fecha', descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return const CircularProgressIndicator();
 
@@ -168,7 +201,9 @@ class _TurismosPageState extends State<TurismosPage> {
                       child: ListTile(
                         contentPadding: const EdgeInsets.all(12),
                         title: Text(data['nombre'] ?? 'Sin nombre'),
-                        subtitle: Text(DateFormat('dd/MM/yyyy HH:mm').format(fecha)),
+                        subtitle: Text(
+                          DateFormat('dd/MM/yyyy HH:mm').format(fecha),
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.comment),
                           onPressed: () => _verResenas(doc.id),
@@ -185,11 +220,18 @@ class _TurismosPageState extends State<TurismosPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {int maxLines = 1, bool isNumber = false}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    int maxLines = 1,
+    bool isNumber = false,
+  }) {
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       maxLines: maxLines,
       validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
