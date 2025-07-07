@@ -1,11 +1,9 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
-import 'resenas_pages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class TurismosPage extends StatefulWidget {
   const TurismosPage({super.key});
@@ -15,87 +13,107 @@ class TurismosPage extends StatefulWidget {
 }
 
 class _TurismosPageState extends State<TurismosPage> {
-  final turismosRef = FirebaseFirestore.instance.collection('turismo');
-  final picker = ImagePicker();
-
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController descripcionController = TextEditingController();
-  final TextEditingController fotoController = TextEditingController();
   final TextEditingController latController = TextEditingController();
   final TextEditingController lngController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController provinciaController = TextEditingController();
+  final TextEditingController ciudadController = TextEditingController();
 
-  Future<void> _pickImage(bool fromCamera) async {
-    final XFile? image = await picker.pickImage(
-      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+  final List<Uint8List> fotosBytes = [];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final picker = ImagePicker();
+  final uuid = const Uuid();
+
+  Future<void> _pickImages() async {
+    final pickedFiles = await picker.pickMultiImage(
       maxWidth: 1024,
       maxHeight: 1024,
       imageQuality: 85,
     );
 
-    if (image != null) {
-      final file = File(image.path);
-      final fileSize = await file.length();
-
-      if (fileSize > 2 * 1024 * 1024) {
-        _showSnackBar('La imagen excede los 2MB');
-        return;
+    if (pickedFiles != null && pickedFiles.length <= 5) {
+      for (var pickedFile in pickedFiles) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          fotosBytes.add(bytes);
+        });
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Puedes subir entre 1 y 5 imágenes.')),
+      );
+    }
+  }
 
-      final ref = FirebaseStorage.instance.ref().child(
-        'turismo/${DateTime.now().millisecondsSinceEpoch}.jpg',
+  Future<List<String>> _subirImagenesASupabase() async {
+    final storage = Supabase.instance.client.storage.from('turismo');
+    final List<String> urls = [];
+
+    for (var i = 0; i < fotosBytes.length; i++) {
+      final String fileName = 'img_${uuid.v4()}.jpg';
+
+      final String? path = await storage.uploadBinary(
+        fileName,
+        fotosBytes[i],
+        fileOptions: const FileOptions(
+          upsert: false,
+          contentType: 'image/jpeg',
+        ),
       );
 
-      await ref.putFile(file);
-      final url = await ref.getDownloadURL();
-
-      setState(() {
-        fotoController.text = url;
-      });
+      if (path != null && path.isNotEmpty) {
+        final publicUrl = storage.getPublicUrl(fileName);
+        urls.add(publicUrl);
+      } else {
+        throw Exception(
+          'Error al subir imagen: No se pudo obtener la ruta del archivo subido.',
+        );
+      }
     }
+
+    return urls;
   }
 
   Future<void> _guardarTurismo() async {
     if (_formKey.currentState!.validate()) {
+      if (fotosBytes.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Debes agregar al menos una foto.')),
+        );
+        return;
+      }
+
       try {
         final lat = double.tryParse(latController.text) ?? 0.0;
         final lng = double.tryParse(lngController.text) ?? 0.0;
         final ubicacion = GeoPoint(lat, lng);
-        final user = Supabase.instance.client.auth.currentUser;
 
-        if (user == null) {
-          _showSnackBar('Usuario no autenticado');
-          return;
-        }
+        final urls = await _subirImagenesASupabase();
 
-        try {
-          final data = await Supabase.instance.client
-              .from('users')
-              .select(
-                'name, lastName',
-              )
-              .eq('id', user.id)
-              .single();
+        await FirebaseFirestore.instance.collection('turismo').add({
+          'nombre': nombreController.text,
+          'descripcion': descripcionController.text,
+          'latitud': lat,
+          'longitud': lng,
+          'fotografias': urls,
+          'provincia': provinciaController.text,
+          'ciudad': ciudadController.text,
+          'ubicacion': ubicacion,
+          'fecha': Timestamp.now(),
+        });
 
-          final String name = '${data['name'] ?? ''} ${data['lastName'] ?? ''}';
-
-          await turismosRef.add({
-            'nombre': nombreController.text,
-            'descripcion': descripcionController.text,
-            'foto': fotoController.text,
-            'ubicacion': ubicacion,
-            'autor': name,
-            'fecha': Timestamp.now(),
-          });
-        } catch (e) {
-          _showSnackBar('Error al obtener el nombre del usuario: $e');
-          return;
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lugar turístico guardado exitosamente.'),
+          ),
+        );
 
         _clearForm();
-        _showSnackBar('Turismo guardado correctamente');
       } catch (e) {
-        _showSnackBar('Error al guardar: $e');
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al guardar: $e')));
       }
     }
   }
@@ -103,118 +121,142 @@ class _TurismosPageState extends State<TurismosPage> {
   void _clearForm() {
     nombreController.clear();
     descripcionController.clear();
-    fotoController.clear();
     latController.clear();
     lngController.clear();
-  }
-
-  void _showSnackBar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  void _verResenas(String turismoId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ResenasPage(lugarId: turismoId)),
-    );
+    provinciaController.clear();
+    ciudadController.clear();
+    setState(() {
+      fotosBytes.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Turismo Ciudadano')),
+      appBar: AppBar(title: const Text('Crear Lugar Turístico')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildTextField(nombreController, 'Nombre'),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    descripcionController,
-                    'Descripción',
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          latController,
-                          'Latitud',
-                          isNumber: true,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _buildTextField(
-                          lngController,
-                          'Longitud',
-                          isNumber: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () => _pickImage(true),
-                        icon: const Icon(Icons.camera_alt),
-                        label: const Text('Cámara'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => _pickImage(false),
-                        icon: const Icon(Icons.image),
-                        label: const Text('Galería'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: _guardarTurismo,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Guardar lugar'),
-                  ),
-                ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              _buildTextField(nombreController, 'Nombre del Lugar'),
+              const SizedBox(height: 12),
+              _buildTextField(
+                descripcionController,
+                'Descripción',
+                maxLines: 3,
               ),
-            ),
-            const Divider(height: 32),
-            StreamBuilder<QuerySnapshot>(
-              stream: turismosRef
-                  .orderBy('fecha', descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const CircularProgressIndicator();
+              const SizedBox(height: 12),
+              _buildTextField(latController, 'Latitud', isNumber: true),
+              const SizedBox(height: 8),
+              _buildTextField(lngController, 'Longitud', isNumber: true),
+              const SizedBox(height: 12),
+              _buildTextField(provinciaController, 'Provincia'),
+              const SizedBox(height: 12),
+              _buildTextField(ciudadController, 'Ciudad'),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: _pickImages,
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('Seleccionar Fotografías'),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                children: fotosBytes.map((bytes) {
+                  return Image.memory(
+                    bytes,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: _guardarTurismo,
+                icon: const Icon(Icons.save),
+                label: const Text('Guardar Lugar'),
+              ),
+              const Divider(height: 40),
+              const Text(
+                'Lugares turísticos guardados',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('turismo')
+                    .orderBy('fecha', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                return Column(
-                  children: snapshot.data!.docs.map((doc) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    final fecha = (data['fecha'] as Timestamp).toDate();
+                  final docs = snapshot.data!.docs;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        title: Text(data['nombre'] ?? 'Sin nombre'),
-                        subtitle: Text(
-                          DateFormat('dd/MM/yyyy HH:mm').format(fecha),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.comment),
-                          onPressed: () => _verResenas(doc.id),
-                        ),
-                      ),
+                  if (docs.isEmpty) {
+                    return const Text(
+                      'Aún no hay lugares turísticos registrados.',
                     );
-                  }).toList(),
-                );
-              },
-            ),
-          ],
+                  }
+
+                  return ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data() as Map<String, dynamic>;
+                      final nombre = data['nombre'] ?? '';
+                      final descripcion = data['descripcion'] ?? '';
+                      final ciudad = data['ciudad'] ?? '';
+                      final provincia = data['provincia'] ?? '';
+                      final fotos = List<String>.from(
+                        data['fotografias'] ?? [],
+                      );
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                nombre,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text('Ubicación: $ciudad, $provincia'),
+                              const SizedBox(height: 4),
+                              Text(descripcion),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                children: fotos.map((url) {
+                                  return Image.network(
+                                    url,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
