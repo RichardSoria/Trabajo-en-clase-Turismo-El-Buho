@@ -12,9 +12,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  String? selectedRole;
   final supabase = Supabase.instance.client;
-  final List<String> roles = ['visitante', 'publicador'];
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(
@@ -22,60 +20,29 @@ class _LoginPageState extends State<LoginPage> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  bool validarCampos() {
-    final campos = {
-      'Correo': emailController.text.trim(),
-      'Contraseña': passwordController.text.trim(),
-      'Rol': selectedRole,
-    };
+  Future<void> login() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-    for (final entry in campos.entries) {
-      if (entry.value == null || entry.value?.isEmpty == true) {
-        _showSnackBar('Todos los campos son obligatorios.');
-        return false;
-      }
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar('Correo y contraseña son obligatorios.');
+      return;
     }
 
-    return true;
-  }
-
-  Future<void> login() async {
-    if (!validarCampos()) return;
     try {
       final response = await supabase.auth.signInWithPassword(
-        email: emailController.text,
-        password: passwordController.text,
+        email: email,
+        password: password,
       );
 
       if (response.user != null) {
-        // Obtener rol real de Supabase
-        final userId = response.user!.id;
-        final data = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', userId)
-            .single();
-
-        final rolGuardado = data['role'];
-
-        if (rolGuardado != selectedRole) {
-          // Cerrar sesión y notificar error de rol
-          await supabase.auth.signOut();
-          _showSnackBar('El rol seleccionado no coincide con tu cuenta');
-          return;
-        }
-
-        // Éxito: AuthGate redirigirá según rol
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Inicio de sesión exitoso')),
-        );
+        _showSnackBar('Inicio de sesión exitoso');
+        // Redirección automática desde AuthGate
       } else {
         throw Exception('Usuario no encontrado');
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al iniciar sesión: $e')));
+      _showSnackBar('Error al iniciar sesión: $e');
     }
   }
 
@@ -114,32 +81,6 @@ class _LoginPageState extends State<LoginPage> {
                   hintText: '******',
                 ),
                 obscureText: true,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Rol de usuario',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: selectedRole,
-                decoration: const InputDecoration(
-                  labelText: 'Selecciona tu rol',
-                  border: OutlineInputBorder(),
-                ),
-                items: roles.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value[0].toUpperCase() + value.substring(1)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedRole = value!;
-                  });
-                },
-                validator: (value) =>
-                    value == null ? 'Selecciona un rol' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
