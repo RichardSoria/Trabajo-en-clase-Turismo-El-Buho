@@ -72,7 +72,7 @@ class _TurismosPageState extends State<TurismosPage> {
       final pickedFiles = await picker.pickMultiImage(
         maxWidth: 1024,
         maxHeight: 1024,
-        imageQuality: 85,
+        imageQuality: 100,
       );
 
       if (pickedFiles != null) {
@@ -210,7 +210,7 @@ class _TurismosPageState extends State<TurismosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear Lugar Turístico')),
+      appBar: AppBar(title: const Text('Gestionar Lugares Turístico')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -320,15 +320,65 @@ class _TurismosPageState extends State<TurismosPage> {
                                 style: const TextStyle(fontSize: 15),
                               ),
                               const SizedBox(height: 8),
-                              Text('Provincia: $provincia'),
-                              Text('Ciudad: $ciudad'),
-                              Text('Coordenadas: $latitud°, $longitud°'),
+                              RichText(
+                                text: TextSpan(
+                                  style: DefaultTextStyle.of(context).style,
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Provincia: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(text: provincia),
+                                  ],
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  style: DefaultTextStyle.of(context).style,
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Ciudad: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(text: ciudad),
+                                  ],
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  style: DefaultTextStyle.of(context).style,
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Coordenadas: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(text: '$latitud°, $longitud°'),
+                                  ],
+                                ),
+                              ),
                               const SizedBox(height: 4),
-                              Text(
-                                'Publicado por: $autor',
-                                style: const TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 13,
+                              RichText(
+                                text: TextSpan(
+                                  style: DefaultTextStyle.of(context).style
+                                      .copyWith(
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Publicado por: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(text: autor),
+                                  ],
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -517,55 +567,120 @@ class _TurismosPageState extends State<TurismosPage> {
   }
 
   Future<void> _agregarMasImagenes(String lugarId, int cantidadActual) async {
-    final pickedFiles = await picker.pickMultiImage(
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
-
-    if (pickedFiles == null || pickedFiles.isEmpty) return;
-
-    final cantidadDisponible = 5 - cantidadActual;
-
-    if (pickedFiles.length > cantidadDisponible) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Solo puedes agregar $cantidadDisponible imágenes.'),
-        ),
-      );
-      return;
-    }
-
-    showDialog(
+    final ImageSource? origen = await showModalBottomSheet<ImageSource?>(
       context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: const Text('Tomar foto'),
+            onTap: () => Navigator.pop(context, ImageSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library),
+            title: const Text('Seleccionar de galería'),
+            onTap: () => Navigator.pop(context, ImageSource.gallery),
+          ),
+        ],
+      ),
     );
+
+    if (origen == null) return;
+
+    final int cantidadDisponible = 5 - cantidadActual;
+    final storage = Supabase.instance.client.storage.from('turismo');
+    final nuevasUrls = <String>[];
 
     try {
-      final storage = Supabase.instance.client.storage.from('turismo');
-      final nuevasUrls = <String>[];
-
-      for (var pickedFile in pickedFiles) {
-        final bytes = await pickedFile.readAsBytes();
-        final fileName = 'img_${uuid.v4()}.jpg';
-
-        final path = await storage.uploadBinary(
-          fileName,
-          bytes,
-          fileOptions: const FileOptions(contentType: 'image/jpeg'),
+      if (origen == ImageSource.camera) {
+        final pickedFile = await picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          imageQuality: 100,
         );
 
-        if (path != null && path.isNotEmpty) {
-          final url = storage.getPublicUrl(fileName);
-          nuevasUrls.add(url);
+        if (pickedFile != null) {
+          if (cantidadDisponible < 1) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Ya tienes 5 imágenes.')),
+            );
+            return;
+          }
+
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const Center(child: CircularProgressIndicator()),
+          );
+
+          final bytes = await pickedFile.readAsBytes();
+          final fileName = 'img_${uuid.v4()}.jpg';
+          final path = await storage.uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(contentType: 'image/jpeg'),
+          );
+
+          if (path != null && path.isNotEmpty) {
+            final url = storage.getPublicUrl(fileName);
+            nuevasUrls.add(url);
+          }
+
+          Navigator.pop(context);
         }
+      } else if (origen == ImageSource.gallery) {
+        final pickedFiles = await picker.pickMultiImage(
+          maxWidth: 1024,
+          maxHeight: 1024,
+          imageQuality: 85,
+        );
+
+        if (pickedFiles == null || pickedFiles.isEmpty) return;
+
+        if (pickedFiles.length > cantidadDisponible) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Solo puedes agregar $cantidadDisponible imágenes.',
+              ),
+            ),
+          );
+          return;
+        }
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
+        );
+
+        for (var pickedFile in pickedFiles) {
+          final bytes = await pickedFile.readAsBytes();
+          final fileName = 'img_${uuid.v4()}.jpg';
+
+          final path = await storage.uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(contentType: 'image/jpeg'),
+          );
+
+          if (path != null && path.isNotEmpty) {
+            final url = storage.getPublicUrl(fileName);
+            nuevasUrls.add(url);
+          }
+        }
+
+        Navigator.pop(context);
       }
 
-      final doc = FirebaseFirestore.instance.collection('turismo').doc(lugarId);
-      await doc.update({'fotografias': FieldValue.arrayUnion(nuevasUrls)});
-
-      Navigator.pop(context); // cierra el spinner
+      if (nuevasUrls.isNotEmpty) {
+        final doc = FirebaseFirestore.instance
+            .collection('turismo')
+            .doc(lugarId);
+        await doc.update({'fotografias': FieldValue.arrayUnion(nuevasUrls)});
+      }
     } catch (e) {
       Navigator.pop(context);
       ScaffoldMessenger.of(
@@ -720,10 +835,26 @@ class _TurismosPageState extends State<TurismosPage> {
     );
   }
 
-  void _verResenas(String lugarId) {
+  void _verResenas(String lugarId) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    final data = await Supabase.instance.client
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    final String rol = data['role'];
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ResenasPage(lugarId: lugarId)),
+      MaterialPageRoute(
+        builder: (context) => ResenasPage(
+          lugarId: lugarId,
+          rolUsuario: rol, // 'publicador' o 'visitante'
+        ),
+      ),
     );
   }
 }

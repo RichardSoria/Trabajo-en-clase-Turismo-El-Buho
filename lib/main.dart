@@ -1,9 +1,10 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'login_page.dart';
 import 'publisher_page.dart';
-import 'geo_page.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'visitor_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,7 +71,7 @@ class AuthGate extends StatelessWidget {
       } else if (role == 'visitante') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const GeoPage()),
+          MaterialPageRoute(builder: (context) => const LugaresVisitantePage()),
         );
       } else {
         ScaffoldMessenger.of(
@@ -92,8 +93,11 @@ class AuthGate extends StatelessWidget {
         final session = Supabase.instance.client.auth.currentSession;
 
         if (session != null) {
-          // Verificar y redirigir según el rol del usuario
-          verificarYRedirigirSegunRol(context);
+          // Esperar al siguiente frame para redirigir correctamente
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            verificarYRedirigirSegunRol(context);
+          });
+
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );

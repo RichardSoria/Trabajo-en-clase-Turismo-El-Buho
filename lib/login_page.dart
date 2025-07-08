@@ -13,8 +13,6 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   String? selectedRole;
-  final nameController = TextEditingController();
-  final lastNameController = TextEditingController();
   final supabase = Supabase.instance.client;
   final List<String> roles = ['visitante', 'publicador'];
 
@@ -50,7 +48,24 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (response.user != null) {
-        // El AuthGate detectará el login y redirigirá según el rol
+        // Obtener rol real de Supabase
+        final userId = response.user!.id;
+        final data = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', userId)
+            .single();
+
+        final rolGuardado = data['role'];
+
+        if (rolGuardado != selectedRole) {
+          // Cerrar sesión y notificar error de rol
+          await supabase.auth.signOut();
+          _showSnackBar('El rol seleccionado no coincide con tu cuenta');
+          return;
+        }
+
+        // Éxito: AuthGate redirigirá según rol
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Inicio de sesión exitoso')),
         );
@@ -86,9 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                   hintText: 'ejemplo@correo.com',
                 ),
               ),
-
               const SizedBox(height: 16),
-
               const Text(
                 'Contraseña',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -102,9 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 obscureText: true,
               ),
-
               const SizedBox(height: 16),
-
               const Text(
                 'Rol de usuario',
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -130,16 +141,12 @@ class _LoginPageState extends State<LoginPage> {
                 validator: (value) =>
                     value == null ? 'Selecciona un rol' : null,
               ),
-
               const SizedBox(height: 24),
-
               ElevatedButton(
                 onPressed: login,
                 child: const Text('Iniciar sesión'),
               ),
-
               const SizedBox(height: 8),
-
               OutlinedButton(
                 onPressed: () {
                   Navigator.pushReplacement(
