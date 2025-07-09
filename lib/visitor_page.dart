@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'resenas_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LugaresVisitantePage extends StatelessWidget {
   const LugaresVisitantePage({super.key});
@@ -30,7 +31,21 @@ class LugaresVisitantePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Lugares Turísticos')),
+      appBar: AppBar(
+        title: const Text('Lugares Turísticos'),
+        actions: [
+          IconButton(
+            tooltip: 'Cerrar sesión',
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/', (route) => false);
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: StreamBuilder<QuerySnapshot>(

@@ -210,7 +210,23 @@ class _TurismosPageState extends State<TurismosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Gestionar Lugares Turístico')),
+      appBar: AppBar(
+        title: const Text('Gestionar Lugares Turístico'),
+        actions: [
+          IconButton(
+            tooltip: 'Cerrar sesión',
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+              if (mounted) {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -551,18 +567,36 @@ class _TurismosPageState extends State<TurismosPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Si, eliminar'),
+            child: const Text('Sí, eliminar'),
           ),
         ],
       ),
     );
 
     if (confirmado == true) {
-      final doc = FirebaseFirestore.instance.collection('turismo').doc(lugarId);
-      await doc.update({
-        'fotografias': FieldValue.arrayRemove([url]),
-      });
-      Navigator.pop(context);
+      // Mostrar spinner
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      try {
+        final doc = FirebaseFirestore.instance
+            .collection('turismo')
+            .doc(lugarId);
+        await doc.update({
+          'fotografias': FieldValue.arrayRemove([url]),
+        });
+
+        Navigator.pop(context); // Cierra el spinner
+        Navigator.pop(context); // Cierra el modal de imagen
+      } catch (e) {
+        Navigator.pop(context); // Cierra el spinner
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al eliminar la imagen: $e')),
+        );
+      }
     }
   }
 
@@ -710,28 +744,50 @@ class _TurismosPageState extends State<TurismosPage> {
     );
 
     if (origen == null) return;
+
     final pickedFile = await picker.pickImage(source: origen);
     if (pickedFile == null) return;
 
-    final nuevoBytes = await pickedFile.readAsBytes();
-    final storage = Supabase.instance.client.storage.from('turismo');
-    final nuevoNombre = 'img_${uuid.v4()}.jpg';
-    final nuevoPath = await storage.uploadBinary(
-      nuevoNombre,
-      nuevoBytes,
-      fileOptions: const FileOptions(contentType: 'image/jpeg'),
+    // Mostrar spinner
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    if (nuevoPath != null && nuevoPath.isNotEmpty) {
-      final nuevaUrl = storage.getPublicUrl(nuevoNombre);
-      final doc = FirebaseFirestore.instance.collection('turismo').doc(lugarId);
-      await doc.update({
-        'fotografias': FieldValue.arrayRemove([urlAntiguo]),
-      });
-      await doc.update({
-        'fotografias': FieldValue.arrayUnion([nuevaUrl]),
-      });
-      Navigator.pop(context);
+    try {
+      final nuevoBytes = await pickedFile.readAsBytes();
+      final storage = Supabase.instance.client.storage.from('turismo');
+      final nuevoNombre = 'img_${uuid.v4()}.jpg';
+
+      final nuevoPath = await storage.uploadBinary(
+        nuevoNombre,
+        nuevoBytes,
+        fileOptions: const FileOptions(contentType: 'image/jpeg'),
+      );
+
+      if (nuevoPath != null && nuevoPath.isNotEmpty) {
+        final nuevaUrl = storage.getPublicUrl(nuevoNombre);
+        final doc = FirebaseFirestore.instance
+            .collection('turismo')
+            .doc(lugarId);
+
+        await doc.update({
+          'fotografias': FieldValue.arrayRemove([urlAntiguo]),
+        });
+
+        await doc.update({
+          'fotografias': FieldValue.arrayUnion([nuevaUrl]),
+        });
+      }
+
+      Navigator.pop(context); // Cierra el spinner
+      Navigator.pop(context); // Cierra el modal de imagen
+    } catch (e) {
+      Navigator.pop(context); // Cierra el spinner
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al actualizar la imagen: $e')),
+      );
     }
   }
 
@@ -808,24 +864,41 @@ class _TurismosPageState extends State<TurismosPage> {
               );
 
               if (confirmado == true) {
-                await FirebaseFirestore.instance
-                    .collection('turismo')
-                    .doc(id)
-                    .update({
-                      'nombre': nombreCtrl.text,
-                      'descripcion': descripcionCtrl.text,
-                      'latitud': double.tryParse(latCtrl.text) ?? 0,
-                      'longitud': double.tryParse(lngCtrl.text) ?? 0,
-                      'provincia': provinciaCtrl.text,
-                      'ciudad': ciudadCtrl.text,
-                    });
-
-                Navigator.pop(context); // Cierra modal de edición
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Lugar actualizado exitosamente.'),
-                  ),
+                // Mostrar spinner mientras se actualiza
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) =>
+                      const Center(child: CircularProgressIndicator()),
                 );
+
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('turismo')
+                      .doc(id)
+                      .update({
+                        'nombre': nombreCtrl.text,
+                        'descripcion': descripcionCtrl.text,
+                        'latitud': double.tryParse(latCtrl.text) ?? 0,
+                        'longitud': double.tryParse(lngCtrl.text) ?? 0,
+                        'provincia': provinciaCtrl.text,
+                        'ciudad': ciudadCtrl.text,
+                      });
+
+                  Navigator.pop(context); // Cierra spinner
+                  Navigator.pop(context); // Cierra modal de edición
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Lugar actualizado exitosamente.'),
+                    ),
+                  );
+                } catch (e) {
+                  Navigator.pop(context); // Cierra spinner
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error al actualizar: $e')),
+                  );
+                }
               }
             },
             child: const Text('Actualizar'),

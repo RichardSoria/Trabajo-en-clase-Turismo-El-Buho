@@ -72,12 +72,33 @@ class _ResenasPageState extends State<ResenasPage> {
 
     if (confirmado != true || updateCtrl.text.trim().isEmpty) return;
 
-    await FirebaseFirestore.instance
-        .collection('turismo')
-        .doc(widget.lugarId)
-        .collection('resenas')
-        .doc(resenaId)
-        .update({'contenido': updateCtrl.text.trim()});
+    // Mostrar spinner
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('turismo')
+          .doc(widget.lugarId)
+          .collection('resenas')
+          .doc(resenaId)
+          .update({'contenido': updateCtrl.text.trim()});
+
+      Navigator.pop(context); // Cierra spinner
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reseña actualizada con éxito')),
+      );
+    } catch (e) {
+      Navigator.pop(context); // Cierra spinner
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al actualizar reseña: $e')));
+    }
   }
 
   Future<void> eliminarResena(String resenaId) async {
@@ -101,12 +122,33 @@ class _ResenasPageState extends State<ResenasPage> {
 
     if (confirmado != true) return;
 
-    await FirebaseFirestore.instance
-        .collection('turismo')
-        .doc(widget.lugarId)
-        .collection('resenas')
-        .doc(resenaId)
-        .delete();
+    // Mostrar spinner
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('turismo')
+          .doc(widget.lugarId)
+          .collection('resenas')
+          .doc(resenaId)
+          .delete();
+
+      Navigator.pop(context); // Cierra spinner
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reseña eliminada exitosamente')),
+      );
+    } catch (e) {
+      Navigator.pop(context); // Cierra spinner
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al eliminar reseña: $e')));
+    }
   }
 
   Future<void> responderResena(String resenaId) async {
