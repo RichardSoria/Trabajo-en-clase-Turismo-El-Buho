@@ -37,7 +37,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'El Búho Turismo',
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: const AuthGate(),
     );
   }
