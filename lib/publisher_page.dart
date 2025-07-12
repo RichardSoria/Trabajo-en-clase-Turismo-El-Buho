@@ -211,7 +211,8 @@ class _TurismosPageState extends State<TurismosPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gestionar Lugares Turístico'),
+        backgroundColor: Color.fromARGB(255, 225, 31, 28),
+        title: const Text('Lugares Turístico'),
         actions: [
           IconButton(
             tooltip: 'Cerrar sesión',

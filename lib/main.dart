@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mi_supabase_flutter/tabs/publicador_tabs.dart';
+import 'package:mi_supabase_flutter/tabs/visitante_tabs.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'login_page.dart';
@@ -88,13 +90,13 @@ class _AuthGateState extends State<AuthGate> {
     if (role == 'publicador') {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const TurismosPage()),
+        MaterialPageRoute(builder: (_) => const PublicadorTabs()),
         (route) => false,
       );
     } else if (role == 'visitante') {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const LugaresVisitantePage()),
+        MaterialPageRoute(builder: (_) => const VisitanteTabs()),
         (route) => false,
       );
     } else {

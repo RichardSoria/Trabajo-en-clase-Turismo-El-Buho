@@ -7,6 +7,7 @@ class PublisherPublicationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 225, 31, 28),
         title: const Text("Publicaciones propias"),
       ),
     );
