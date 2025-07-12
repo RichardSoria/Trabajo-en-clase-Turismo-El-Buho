@@ -60,18 +60,15 @@ class _LoginPageState extends State<LoginPage> {
 
         final String role = data['role'];
 
-
-        _showSnackBar('Inicio de sesión exitoso');
+        
 
         // Redirigir según el rol
         if (!mounted) return;
 
-        //Se cambia la página estática por la tab ######################################
         if (role == 'publicador') {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const PublicadorTabs()),
-            //MaterialPageRoute(builder: (_) => const TurismosPage()),
             (route) => false,
           );
         } else if (role == 'visitante') {
