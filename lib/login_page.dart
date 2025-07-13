@@ -86,7 +86,11 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       _showSnackBar('Error: $e', error: true);
     } finally {
-      setState(() => _cargando = false);
+
+      //Salía error, porque el navigator ejecutado en el try elimina el contexto, y al hacerlo
+      //se elimina el estado de esta página. Por lo que, al intentar setear algo que no existe
+      //salía error.
+      //setState(() => _cargando = false);
     }
   }
 

@@ -32,6 +32,8 @@ class LugaresVisitantePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 22, 36, 62),
+        foregroundColor: Colors.white,
         title: const Text('Lugares Turísticos'),
         actions: [
           IconButton(

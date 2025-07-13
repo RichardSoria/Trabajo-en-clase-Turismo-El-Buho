@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mi_supabase_flutter/login_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 
@@ -95,7 +96,7 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
         return;
       }
 
-      await supabase
+      final response = await supabase
         .from("users")
         .update({
           'name': nombre,
@@ -126,6 +127,35 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
     }
   }
 
+  Future<void> deleteUserAccount() async {
+    try
+    {
+      await supabase.from('users')
+      .delete()
+      .eq('id', '${supabase.auth.currentUser?.id}');
+    
+      Navigator.pushAndRemoveUntil(context, 
+      MaterialPageRoute(builder: (_) => const LoginPage()), 
+      (route) => false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Cuenta eliminada exitosamente"),
+          backgroundColor: Colors.green[400],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+    catch (e)
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error al eliminar su cuenta ${e}"),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -147,10 +177,11 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
     }
     
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 254, 247, 255),
+      backgroundColor: Color.fromARGB(255, 243, 244, 248),
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 225, 31, 28),
-        title: const Text("Perfil de visitante"),
+        backgroundColor: Color.fromARGB(255, 22, 36, 62),
+        foregroundColor: Colors.white,
+        title: const Text("Perfil de publicador"),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -170,7 +201,8 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
           padding: EdgeInsetsGeometry.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+            children: 
+            [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -305,17 +337,115 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
                   )
                 ],
               ),
+
+              Expanded
+              (
+                child: Row
+                (
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children:
+                  [
+                    Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {updateUsersData();},
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 244, 189, 73)),
+                            foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+                            padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.symmetric(vertical: 16)),
+                            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)
+                              ),
+                            )
+                          ),
+                          child: Text(
+                            "Actualizar datos",
+                            style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600
+                            )
+                          )
+                        )
+                      )
+                  ]
+                )
+              ),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children:[
+                  children: [
                     ElevatedButton(
-                      onPressed: () {updateUsersData();},
-                      style:ButtonStyle(),
-                      child: Text("Actualizar datos")
-                    ),
-                  ]
-                )
+                      onPressed: () {
+                        showDialog(
+                          context: context, 
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: Color.fromARGB(255, 243, 244, 248),
+                              alignment: Alignment.center,
+                              title: Text("Eliminar cuenta", textAlign: TextAlign.center),
+                              content: Text("¿Está seguro que desea eliminar su cuenta?. Este cambio es irreversible.", textAlign: TextAlign.justify,),
+                              actions: [
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child:
+                                        Padding(
+                                          padding: EdgeInsets.only(right: 10),
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                            }, 
+                                            style: ButtonStyle( 
+                                              backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 225, 31, 28)),
+                                              foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                                              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12)
+                                                )
+                                              )
+                                            ),
+                                            child: Text("Eliminar")
+                                          )
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: ElevatedButton
+                                        (
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          }, 
+                                          style: ButtonStyle(
+                                            backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 225, 31, 28)),
+                                            foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                                            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12)
+                                              )
+                                            )
+                                          ),
+                                          child: Text("Cancelar")
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
+                            );
+                        });
+                      }, 
+                      child: Text("Eliminar cuenta"),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 225, 31, 28)),
+                        foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          )
+                        )
+                      ),
+                      )
+                  ],
+                ),
               )
             ],
           ),
