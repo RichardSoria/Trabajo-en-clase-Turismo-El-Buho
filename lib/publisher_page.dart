@@ -407,56 +407,60 @@ class _TurismosPageState extends State<TurismosPage> {
   }
 
   Future<bool> _confirmarGuardarLugar() async {
-  return await showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            '¿Estás seguro?',
-            style: TextStyle(
-              color: Color(0xFF0e4c71),
-              fontWeight: FontWeight.bold,
+    return await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          content: const Text(
-            '¿Deseas guardar este lugar turístico?',
-            style: TextStyle(
-              fontSize: 15,
-            ),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.grey.shade300,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+            title: const Text(
+              '¿Estás seguro?',
+              style: TextStyle(
+                color: Color(0xFF0e4c71),
+                fontWeight: FontWeight.bold,
               ),
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar'),
             ),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Color(0xFFF8AD25),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            content: const Text(
+              '¿Deseas guardar este lugar turístico?',
+              style: TextStyle(fontSize: 15),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.grey.shade300,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar'),
               ),
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Guardar'),
-            ),
-          ],
-        ),
-      ) ??
-      false;
-}
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Color(0xFFF8AD25),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Guardar'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 
   void _confirmarEliminarLugar(String id) async {
     final confirmado = await showDialog(
@@ -923,20 +927,33 @@ class _TurismosPageState extends State<TurismosPage> {
   }
 
   Widget _infoText(String label, String value, {bool italic = false}) {
-    return RichText(
-      text: TextSpan(
-        style: TextStyle(
-          color: Colors.black87,
-          fontSize: 14,
-          fontStyle: italic ? FontStyle.italic : FontStyle.normal,
-        ),
-        children: [
-          TextSpan(
-            text: label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: RichText(
+        text: TextSpan(
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 16, // más grande
+            fontStyle: italic ? FontStyle.italic : FontStyle.normal,
           ),
-          TextSpan(text: value),
-        ],
+          children: [
+            TextSpan(
+              text: "$label: ",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                color: Colors.black87, // azul institucional
+              ),
+            ),
+            TextSpan(
+              text: value,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1132,7 +1149,7 @@ class _TurismosPageState extends State<TurismosPage> {
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0e4c71),
+                                  color: Color(0xFFE72F2B),
                                 ),
                               ),
                               const SizedBox(height: 4),
