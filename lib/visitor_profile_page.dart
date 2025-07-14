@@ -119,7 +119,7 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
     {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error al actualizar sus datos ${e}"),
+          content: Text("Error al actualizar sus datos $e"),
           backgroundColor: Colors.red[400],
           behavior: SnackBarBehavior.floating,
         ),
@@ -149,7 +149,7 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
     {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error al eliminar su cuenta ${e}"),
+          content: Text("Error al eliminar su cuenta $e"),
           backgroundColor: Colors.red[400],
           behavior: SnackBarBehavior.floating,
         ),
@@ -432,8 +432,7 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
                               ],
                             );
                         });
-                      }, 
-                      child: Text("Eliminar cuenta"),
+                      },
                       style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.all<Color>(Color.fromARGB(255, 225, 31, 28)),
                         foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
@@ -442,7 +441,8 @@ class _VisitorProfilePageState extends State<VisitorProfilePage> {
                             borderRadius: BorderRadius.circular(12)
                           )
                         )
-                      ),
+                      ), 
+                      child: Text("Eliminar cuenta"),
                       )
                   ],
                 ),

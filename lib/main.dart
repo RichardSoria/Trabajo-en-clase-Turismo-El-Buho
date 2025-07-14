@@ -4,6 +4,7 @@ import 'package:mi_supabase_flutter/tabs/visitante_tabs.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'login_page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -106,7 +107,13 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     return _checkingSession
-        ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+        ? const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+              ),
+            ),
+          )
         : const LoginPage();
   }
 }

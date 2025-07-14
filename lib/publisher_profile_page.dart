@@ -149,7 +149,13 @@ class _PublisherProfilePageState extends State<PublisherProfilePage> {
   @override
   Widget build(BuildContext context) {
     if (!_datosCargados) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+          ),
+        ),
+      );
     }
 
     return Scaffold(

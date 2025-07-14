@@ -27,7 +27,9 @@ class _TurismosPageState extends State<TurismosPage> {
   final picker = ImagePicker();
   final uuid = const Uuid();
 
-  Future<void> _pickImages() async {
+  Future<void> _pickImages(StateSetter setModalState) async {
+    final picker = ImagePicker();
+
     final origen = await showModalBottomSheet<ImageSource?>(
       context: context,
       builder: (context) => Column(
@@ -59,15 +61,15 @@ class _TurismosPageState extends State<TurismosPage> {
 
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          if (fotosBytes.length < 5) {
+        if (fotosBytes.length < 5) {
+          setModalState(() {
             fotosBytes.add(bytes);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Máximo 5 imágenes permitidas.')),
-            );
-          }
-        });
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Máximo 5 imágenes permitidas.')),
+          );
+        }
       }
     } else if (origen == ImageSource.gallery) {
       final pickedFiles = await picker.pickMultiImage(
@@ -76,19 +78,17 @@ class _TurismosPageState extends State<TurismosPage> {
         imageQuality: 100,
       );
 
-      if (pickedFiles != null) {
-        if (pickedFiles.length + fotosBytes.length <= 5) {
-          for (var pickedFile in pickedFiles) {
-            final bytes = await pickedFile.readAsBytes();
-            setState(() {
-              fotosBytes.add(bytes);
-            });
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Puedes subir entre 1 y 5 imágenes.')),
-          );
+      if ((pickedFiles.length + fotosBytes.length) <= 5) {
+        for (var pickedFile in pickedFiles) {
+          final bytes = await pickedFile.readAsBytes();
+          setModalState(() {
+            fotosBytes.add(bytes);
+          });
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Puedes subir entre 1 y 5 imágenes.')),
+        );
       }
     }
   }
@@ -100,7 +100,7 @@ class _TurismosPageState extends State<TurismosPage> {
     for (var i = 0; i < fotosBytes.length; i++) {
       final String fileName = 'img_${uuid.v4()}.jpg';
 
-      final String? path = await storage.uploadBinary(
+      final String path = await storage.uploadBinary(
         fileName,
         fotosBytes[i],
         fileOptions: const FileOptions(
@@ -147,7 +147,11 @@ class _TurismosPageState extends State<TurismosPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+        ),
+      ),
     );
 
     try {
@@ -170,6 +174,7 @@ class _TurismosPageState extends State<TurismosPage> {
 
       await FirebaseFirestore.instance.collection('turismo').add({
         'autor': autorNombre,
+        'userID': user.id,
         'nombre': nombreController.text,
         'descripcion': descripcionController.text,
         'latitud': lat,
@@ -307,7 +312,11 @@ class _TurismosPageState extends State<TurismosPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+          ),
+        ),
       );
 
       try {
@@ -375,7 +384,11 @@ class _TurismosPageState extends State<TurismosPage> {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator()),
+            builder: (_) => const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+              ),
+            ),
           );
 
           final bytes = await pickedFile.readAsBytes();
@@ -386,7 +399,7 @@ class _TurismosPageState extends State<TurismosPage> {
             fileOptions: const FileOptions(contentType: 'image/jpeg'),
           );
 
-          if (path != null && path.isNotEmpty) {
+          if (path.isNotEmpty) {
             final url = storage.getPublicUrl(fileName);
             nuevasUrls.add(url);
           }
@@ -400,7 +413,7 @@ class _TurismosPageState extends State<TurismosPage> {
           imageQuality: 85,
         );
 
-        if (pickedFiles == null || pickedFiles.isEmpty) return;
+        if (pickedFiles.isEmpty) return;
 
         if (pickedFiles.length > cantidadDisponible) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -416,7 +429,11 @@ class _TurismosPageState extends State<TurismosPage> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (_) => const Center(child: CircularProgressIndicator()),
+          builder: (_) => const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+            ),
+          ),
         );
 
         for (var pickedFile in pickedFiles) {
@@ -429,7 +446,7 @@ class _TurismosPageState extends State<TurismosPage> {
             fileOptions: const FileOptions(contentType: 'image/jpeg'),
           );
 
-          if (path != null && path.isNotEmpty) {
+          if (path.isNotEmpty) {
             final url = storage.getPublicUrl(fileName);
             nuevasUrls.add(url);
           }
@@ -481,7 +498,11 @@ class _TurismosPageState extends State<TurismosPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+        ),
+      ),
     );
 
     try {
@@ -495,7 +516,7 @@ class _TurismosPageState extends State<TurismosPage> {
         fileOptions: const FileOptions(contentType: 'image/jpeg'),
       );
 
-      if (nuevoPath != null && nuevoPath.isNotEmpty) {
+      if (nuevoPath.isNotEmpty) {
         final nuevaUrl = storage.getPublicUrl(nuevoNombre);
         final doc = FirebaseFirestore.instance
             .collection('turismo')
@@ -597,8 +618,13 @@ class _TurismosPageState extends State<TurismosPage> {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (_) =>
-                      const Center(child: CircularProgressIndicator()),
+                  builder: (_) => const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFFF8AD25),
+                      ),
+                    ),
+                  ),
                 );
 
                 try {
@@ -697,12 +723,6 @@ class _TurismosPageState extends State<TurismosPage> {
               borderSide: const BorderSide(color: Color(0xFF98B7DF), width: 2),
             ),
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Este campo es obligatorio';
-            }
-            return null;
-          },
         ),
       ],
     );
@@ -731,90 +751,94 @@ class _TurismosPageState extends State<TurismosPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      isDismissible: false,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          top: 30,
-          left: 20,
-          right: 20,
-        ),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _styledField(nombreController, 'Nombre del Lugar'),
-                const SizedBox(height: 12),
-                _styledField(descripcionController, 'Descripción', maxLines: 2),
-                const SizedBox(height: 12),
-                _styledField(latController, 'Latitud', isNumber: true),
-                const SizedBox(height: 12),
-                _styledField(lngController, 'Longitud', isNumber: true),
-                const SizedBox(height: 12),
-                _styledField(provinciaController, 'Provincia'),
-                const SizedBox(height: 12),
-                _styledField(ciudadController, 'Ciudad'),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: _pickImages,
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text('Seleccionar Fotografías'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF8AD25),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 14,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              top: 30,
+              left: 20,
+              right: 20,
+            ),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _styledField(nombreController, 'Nombre del Lugar'),
+                    const SizedBox(height: 12),
+                    _styledField(descripcionController, 'Descripción', maxLines: 2),
+                    const SizedBox(height: 12),
+                    _styledField(latController, 'Latitud', isNumber: true),
+                    const SizedBox(height: 12),
+                    _styledField(lngController, 'Longitud', isNumber: true),
+                    const SizedBox(height: 12),
+                    _styledField(provinciaController, 'Provincia'),
+                    const SizedBox(height: 12),
+                    _styledField(ciudadController, 'Ciudad'),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => _pickImages(setModalState),
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Seleccionar Fotografías'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF8AD25),
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      children: fotosBytes.map((bytes) {
+                        return Image.memory(
+                          bytes,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        );
+                      }).toList(),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  children: fotosBytes.map((bytes) {
-                    return Image.memory(
-                      bytes,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    );
-                  }).toList(),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    await _guardarTurismo(
-                      onSuccess: () {
-                        if (context.mounted) Navigator.of(context).pop();
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await _guardarTurismo(
+                          onSuccess: () {
+                            if (context.mounted) Navigator.of(context).pop();
+                          },
+                        );
                       },
-                    );
-                  },
-                  icon: const Icon(Icons.save),
-                  label: const Text('Guardar Lugar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0e4c71),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
+                      icon: const Icon(Icons.save),
+                      label: const Text('Guardar Lugar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0e4c71),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -858,7 +882,13 @@ class _TurismosPageState extends State<TurismosPage> {
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFFF8AD25),
+                        ),
+                      ),
+                    );
                   }
 
                   final docs = snapshot.data!.docs;
@@ -868,6 +898,8 @@ class _TurismosPageState extends State<TurismosPage> {
                       'Aún no hay lugares turísticos registrados.',
                     );
                   }
+
+                  final user = Supabase.instance.client.auth.currentUser;
 
                   return ListView.builder(
                     itemCount: docs.length,
@@ -880,17 +912,24 @@ class _TurismosPageState extends State<TurismosPage> {
                       final ciudad = data['ciudad'] ?? '';
                       final provincia = data['provincia'] ?? '';
                       final autor = data['autor'] ?? 'Desconocido';
+                      final userID =
+                          data['userID']; // Asegúrate de guardar esto en Firestore
                       final latitud = data['latitud']?.toString() ?? '-';
                       final longitud = data['longitud']?.toString() ?? '-';
                       final fotos = List<String>.from(
                         data['fotografias'] ?? [],
                       );
 
+                      final esCreador = userID == user?.id;
+
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 10),
                         elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -899,6 +938,7 @@ class _TurismosPageState extends State<TurismosPage> {
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0e4c71),
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -915,6 +955,7 @@ class _TurismosPageState extends State<TurismosPage> {
                               ),
                               _infoText("Publicado por: ", autor, italic: true),
                               const SizedBox(height: 12),
+
                               if (fotos.isNotEmpty)
                                 Wrap(
                                   spacing: 8,
@@ -935,34 +976,64 @@ class _TurismosPageState extends State<TurismosPage> {
                                     );
                                   }).toList(),
                                 ),
+
                               const SizedBox(height: 8),
-                              if (fotos.length < 5)
+
+                              if (esCreador && fotos.length < 5)
                                 TextButton.icon(
                                   onPressed: () =>
                                       _agregarMasImagenes(docId, fotos.length),
                                   icon: const Icon(Icons.add_a_photo),
                                   label: const Text('Agregar imagen'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: const Color(0xFF0e4c71),
+                                  ),
                                 ),
-                              const Divider(),
+
+                              if (esCreador) const Divider(height: 24),
+
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
+                                  if (esCreador)
+                                    IconButton(
+                                      onPressed: () =>
+                                          _editarLugar(docId, data),
+                                      icon: const Icon(Icons.edit),
+                                      tooltip: 'Editar',
+                                      color: Colors.white,
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all(
+                                              Color(0xFF0e4c71),
+                                            ),
+                                      ),
+                                    ),
+                                  if (esCreador)
+                                    IconButton(
+                                      onPressed: () =>
+                                          _confirmarEliminarLugar(docId),
+                                      icon: const Icon(Icons.delete),
+                                      tooltip: 'Eliminar',
+                                      color: Colors.white,
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            WidgetStateProperty.all(
+                                              Color(0xFFE72F2B),
+                                            ),
+                                      ),
+                                    ),
                                   IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    tooltip: 'Editar',
-                                    onPressed: () => _editarLugar(docId, data),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    tooltip: 'Eliminar',
-                                    onPressed: () =>
-                                        _confirmarEliminarLugar(docId),
-                                  ),
-                                  IconButton(
+                                    onPressed: () => _verResenas(docId),
                                     icon: const Icon(Icons.reviews),
                                     tooltip: 'Ver reseñas',
-                                    onPressed: () => _verResenas(docId),
+                                    color: Colors.white,
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                        Color(0xFF0e4c71),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),

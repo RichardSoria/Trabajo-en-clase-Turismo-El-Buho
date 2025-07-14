@@ -4,8 +4,6 @@ import 'package:mi_supabase_flutter/tabs/publicador_tabs.dart';
 import 'package:mi_supabase_flutter/tabs/visitante_tabs.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'signup_page.dart';
-import 'publisher_page.dart';
-import 'visitor_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
