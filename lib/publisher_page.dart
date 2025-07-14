@@ -109,7 +109,7 @@ class _TurismosPageState extends State<TurismosPage> {
         ),
       );
 
-      if (path != null && path.isNotEmpty) {
+      if (path.isNotEmpty) {
         final publicUrl = storage.getPublicUrl(fileName);
         urls.add(publicUrl);
       } else {
@@ -138,12 +138,34 @@ class _TurismosPageState extends State<TurismosPage> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Campos incompletos'),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Campos incompletos',
+            style: TextStyle(
+              color: Color(0xFF0e4c71),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           content: const Text(
             'Por favor completa todos los campos obligatorios.',
+            style: TextStyle(fontSize: 15),
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0xFFF8AD25),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Aceptar'),
             ),
@@ -157,10 +179,115 @@ class _TurismosPageState extends State<TurismosPage> {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Faltan imágenes'),
-          content: const Text('Debes agregar al menos una fotografía.'),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Faltan imágenes',
+            style: TextStyle(
+              color: Color(0xFF0e4c71),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'Debes agregar al menos una fotografía.',
+            style: TextStyle(fontSize: 15),
+          ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0xFFF8AD25),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    if (camposVacios) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Campos incompletos',
+            style: TextStyle(
+              color: Color(0xFF0e4c71),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'Por favor completa todos los campos obligatorios.',
+            style: TextStyle(fontSize: 15),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0xFFF8AD25),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (fotosBytes.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Faltan imágenes',
+            style: TextStyle(
+              color: Color(0xFF0e4c71),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'Debes agregar al menos una fotografía.',
+            style: TextStyle(fontSize: 15),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0xFFF8AD25),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Aceptar'),
             ),
@@ -280,25 +407,56 @@ class _TurismosPageState extends State<TurismosPage> {
   }
 
   Future<bool> _confirmarGuardarLugar() async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('¿Estás seguro?'),
-            content: const Text('¿Deseas guardar este lugar turístico?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Guardar'),
-              ),
-            ],
+  return await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        ) ??
-        false; // En caso de que el diálogo se cierre sin elegir
-  }
+          title: const Text(
+            '¿Estás seguro?',
+            style: TextStyle(
+              color: Color(0xFF0e4c71),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            '¿Deseas guardar este lugar turístico?',
+            style: TextStyle(
+              fontSize: 15,
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.grey.shade300,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Color(0xFFF8AD25),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Guardar'),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+}
 
   void _confirmarEliminarLugar(String id) async {
     final confirmado = await showDialog(
@@ -874,8 +1032,8 @@ class _TurismosPageState extends State<TurismosPage> {
         );
       },
     ).whenComplete(() {
-    _clearForm(); // Limpia aunque el modal se cierre por fuera (por ejemplo deslizando)
-  });
+      _clearForm(); // Limpia aunque el modal se cierre por fuera (por ejemplo deslizando)
+    });
   }
 
   @override
