@@ -122,20 +122,50 @@ class _TurismosPageState extends State<TurismosPage> {
     return urls;
   }
 
-  Future<void> _guardarTurismo({VoidCallback? onSuccess}) async {
-    final isValid = _formKey.currentState!.validate();
-    if (!isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor completa todos los campos obligatorios.'),
+  Future<void> _guardarTurismo(BuildContext context) async {
+    final campos = [
+      nombreController.text,
+      descripcionController.text,
+      latController.text,
+      lngController.text,
+      provinciaController.text,
+      ciudadController.text,
+    ];
+
+    final camposVacios = campos.any((campo) => campo.trim().isEmpty);
+
+    if (camposVacios) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Campos incompletos'),
+          content: const Text(
+            'Por favor completa todos los campos obligatorios.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Aceptar'),
+            ),
+          ],
         ),
       );
       return;
     }
 
     if (fotosBytes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Debes agregar al menos una foto.')),
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Faltan imágenes'),
+          content: const Text('Debes agregar al menos una fotografía.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
       );
       return;
     }
@@ -143,7 +173,6 @@ class _TurismosPageState extends State<TurismosPage> {
     final confirmado = await _confirmarGuardarLugar();
     if (!confirmado) return;
 
-    // Mostrar spinner mientras se guarda
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -187,20 +216,29 @@ class _TurismosPageState extends State<TurismosPage> {
       });
 
       Navigator.pop(context); // Cierra el spinner
+      Navigator.pop(context); // Cierra el modal
 
-      // Ejecutar cierre del modal si se proporcionó
-      onSuccess?.call();
+      // Limpiar campos y fotos
+      _clearForm();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lugar turístico guardado exitosamente.')),
       );
-
-      _clearForm();
     } catch (e) {
       Navigator.pop(context); // Cierra el spinner
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al guardar: $e')));
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Error'),
+          content: Text('Ocurrió un error al guardar: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -211,9 +249,7 @@ class _TurismosPageState extends State<TurismosPage> {
     lngController.clear();
     provinciaController.clear();
     ciudadController.clear();
-    setState(() {
-      fotosBytes.clear();
-    });
+    fotosBytes.clear();
   }
 
   void _mostrarModalImagen(String url, String lugarId) {
@@ -771,7 +807,11 @@ class _TurismosPageState extends State<TurismosPage> {
                   children: [
                     _styledField(nombreController, 'Nombre del Lugar'),
                     const SizedBox(height: 12),
-                    _styledField(descripcionController, 'Descripción', maxLines: 2),
+                    _styledField(
+                      descripcionController,
+                      'Descripción',
+                      maxLines: 2,
+                    ),
                     const SizedBox(height: 12),
                     _styledField(latController, 'Latitud', isNumber: true),
                     const SizedBox(height: 12),
@@ -811,13 +851,7 @@ class _TurismosPageState extends State<TurismosPage> {
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      onPressed: () async {
-                        await _guardarTurismo(
-                          onSuccess: () {
-                            if (context.mounted) Navigator.of(context).pop();
-                          },
-                        );
-                      },
+                      onPressed: () => _guardarTurismo(context),
                       icon: const Icon(Icons.save),
                       label: const Text('Guardar Lugar'),
                       style: ElevatedButton.styleFrom(
@@ -839,7 +873,9 @@ class _TurismosPageState extends State<TurismosPage> {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+    _clearForm(); // Limpia aunque el modal se cierre por fuera (por ejemplo deslizando)
+  });
   }
 
   @override
