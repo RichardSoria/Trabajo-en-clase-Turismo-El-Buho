@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -121,7 +122,7 @@ class _TurismosPageState extends State<TurismosPage> {
     return urls;
   }
 
-  Future<void> _guardarTurismo() async {
+  Future<void> _guardarTurismo({VoidCallback? onSuccess}) async {
     final isValid = _formKey.currentState!.validate();
     if (!isValid) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -182,6 +183,9 @@ class _TurismosPageState extends State<TurismosPage> {
 
       Navigator.pop(context); // Cierra el spinner
 
+      // Ejecutar cierre del modal si se proporcionó
+      onSuccess?.call();
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lugar turístico guardado exitosamente.')),
       );
@@ -205,283 +209,6 @@ class _TurismosPageState extends State<TurismosPage> {
     setState(() {
       fotosBytes.clear();
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 22, 36, 62),
-        foregroundColor: Colors.white,
-        title: const Text('Lugares Turístico'),
-        actions: [
-          IconButton(
-            tooltip: 'Cerrar sesión',
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await Supabase.instance.client.auth.signOut();
-              if (mounted) {
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/', (route) => false);
-              }
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildTextField(nombreController, 'Nombre del Lugar'),
-              const SizedBox(height: 12),
-              _buildTextField(
-                descripcionController,
-                'Descripción',
-                maxLines: 3,
-              ),
-              const SizedBox(height: 12),
-              _buildTextField(latController, 'Latitud', isNumber: true),
-              const SizedBox(height: 8),
-              _buildTextField(lngController, 'Longitud', isNumber: true),
-              const SizedBox(height: 12),
-              _buildTextField(provinciaController, 'Provincia'),
-              const SizedBox(height: 12),
-              _buildTextField(ciudadController, 'Ciudad'),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: _pickImages,
-                icon: const Icon(Icons.camera_alt),
-                label: const Text('Seleccionar Fotografías'),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                children: fotosBytes.map((bytes) {
-                  return Image.memory(
-                    bytes,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: _guardarTurismo,
-                icon: const Icon(Icons.save),
-                label: const Text('Guardar Lugar'),
-              ),
-              const Divider(height: 40),
-              const Text(
-                'Lugares turísticos guardados',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('turismo')
-                    .orderBy('fecha', descending: true)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final docs = snapshot.data!.docs;
-
-                  if (docs.isEmpty) {
-                    return const Text(
-                      'Aún no hay lugares turísticos registrados.',
-                    );
-                  }
-
-                  return ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      final data = docs[index].data() as Map<String, dynamic>;
-                      final docId = docs[index].id;
-
-                      final nombre = data['nombre'] ?? '';
-                      final descripcion = data['descripcion'] ?? '';
-                      final ciudad = data['ciudad'] ?? '';
-                      final provincia = data['provincia'] ?? '';
-                      final autor = data['autor'] ?? 'Desconocido';
-                      final latitud = data['latitud']?.toString() ?? '-';
-                      final longitud = data['longitud']?.toString() ?? '-';
-                      final fotos = List<String>.from(
-                        data['fotografias'] ?? [],
-                      );
-
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 10),
-                        elevation: 4,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                nombre,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                descripcion,
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                              const SizedBox(height: 8),
-                              RichText(
-                                text: TextSpan(
-                                  style: DefaultTextStyle.of(context).style,
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Provincia: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(text: provincia),
-                                  ],
-                                ),
-                              ),
-                              RichText(
-                                text: TextSpan(
-                                  style: DefaultTextStyle.of(context).style,
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Ciudad: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(text: ciudad),
-                                  ],
-                                ),
-                              ),
-                              RichText(
-                                text: TextSpan(
-                                  style: DefaultTextStyle.of(context).style,
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Coordenadas: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(text: '$latitud°, $longitud°'),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              RichText(
-                                text: TextSpan(
-                                  style: DefaultTextStyle.of(context).style
-                                      .copyWith(
-                                        fontSize: 13,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Publicado por: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(text: autor),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              if (fotos.isNotEmpty)
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: fotos.map((url) {
-                                    return GestureDetector(
-                                      onTap: () =>
-                                          _mostrarModalImagen(url, docId),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          url,
-                                          width: 100,
-                                          height: 100,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              const SizedBox(height: 8),
-                              if (fotos.length < 5)
-                                TextButton.icon(
-                                  onPressed: () =>
-                                      _agregarMasImagenes(docId, fotos.length),
-                                  icon: const Icon(Icons.add_a_photo),
-                                  label: const Text('Agregar imagen'),
-                                ),
-                              const Divider(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    tooltip: 'Editar',
-                                    onPressed: () => _editarLugar(docId, data),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    tooltip: 'Eliminar',
-                                    onPressed: () =>
-                                        _confirmarEliminarLugar(docId),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.reviews),
-                                    tooltip: 'Ver reseñas',
-                                    onPressed: () => _verResenas(docId),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
-    int maxLines = 1,
-    bool isNumber = false,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-      maxLines: maxLines,
-      validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
-    );
   }
 
   void _mostrarModalImagen(String url, String lugarId) {
@@ -930,6 +657,353 @@ class _TurismosPageState extends State<TurismosPage> {
           rolUsuario: rol, // 'publicador' o 'visitante'
         ),
       ),
+    );
+  }
+
+  Widget _styledField(
+    TextEditingController controller,
+    String label, {
+    int maxLines = 1,
+    bool isNumber = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        ),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          inputFormatters: isNumber
+              ? [FilteringTextInputFormatter.allow(RegExp(r'[0-9.\-]'))]
+              : null,
+          decoration: InputDecoration(
+            fillColor: Colors.white,
+            filled: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(25),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(25),
+              borderSide: const BorderSide(color: Color(0xFF98B7DF), width: 2),
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Este campo es obligatorio';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _infoText(String label, String value, {bool italic = false}) {
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(
+          color: Colors.black87,
+          fontSize: 14,
+          fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+        ),
+        children: [
+          TextSpan(
+            text: label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          TextSpan(text: value),
+        ],
+      ),
+    );
+  }
+
+  void _mostrarFormularioModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          top: 30,
+          left: 20,
+          right: 20,
+        ),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _styledField(nombreController, 'Nombre del Lugar'),
+                const SizedBox(height: 12),
+                _styledField(descripcionController, 'Descripción', maxLines: 2),
+                const SizedBox(height: 12),
+                _styledField(latController, 'Latitud', isNumber: true),
+                const SizedBox(height: 12),
+                _styledField(lngController, 'Longitud', isNumber: true),
+                const SizedBox(height: 12),
+                _styledField(provinciaController, 'Provincia'),
+                const SizedBox(height: 12),
+                _styledField(ciudadController, 'Ciudad'),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: _pickImages,
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text('Seleccionar Fotografías'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF8AD25),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  children: fotosBytes.map((bytes) {
+                    return Image.memory(
+                      bytes,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    );
+                  }).toList(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    await _guardarTurismo(
+                      onSuccess: () {
+                        if (context.mounted) Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.save),
+                  label: const Text('Guardar Lugar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0e4c71),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 22, 36, 62),
+        foregroundColor: Colors.white,
+        title: const Text('Lugares Turístico'),
+        actions: [
+          IconButton(
+            tooltip: 'Cerrar sesión',
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+              if (mounted) {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            },
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Lugares turísticos guardados',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('turismo')
+                    .orderBy('fecha', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final docs = snapshot.data!.docs;
+
+                  if (docs.isEmpty) {
+                    return const Text(
+                      'Aún no hay lugares turísticos registrados.',
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data() as Map<String, dynamic>;
+                      final docId = docs[index].id;
+
+                      final nombre = data['nombre'] ?? '';
+                      final descripcion = data['descripcion'] ?? '';
+                      final ciudad = data['ciudad'] ?? '';
+                      final provincia = data['provincia'] ?? '';
+                      final autor = data['autor'] ?? 'Desconocido';
+                      final latitud = data['latitud']?.toString() ?? '-';
+                      final longitud = data['longitud']?.toString() ?? '-';
+                      final fotos = List<String>.from(
+                        data['fotografias'] ?? [],
+                      );
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        elevation: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                nombre,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                descripcion,
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                              const SizedBox(height: 8),
+                              _infoText("Provincia: ", provincia),
+                              _infoText("Ciudad: ", ciudad),
+                              _infoText(
+                                "Coordenadas: ",
+                                '$latitud°, $longitud°',
+                              ),
+                              _infoText("Publicado por: ", autor, italic: true),
+                              const SizedBox(height: 12),
+                              if (fotos.isNotEmpty)
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: fotos.map((url) {
+                                    return GestureDetector(
+                                      onTap: () =>
+                                          _mostrarModalImagen(url, docId),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          url,
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              const SizedBox(height: 8),
+                              if (fotos.length < 5)
+                                TextButton.icon(
+                                  onPressed: () =>
+                                      _agregarMasImagenes(docId, fotos.length),
+                                  icon: const Icon(Icons.add_a_photo),
+                                  label: const Text('Agregar imagen'),
+                                ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    tooltip: 'Editar',
+                                    onPressed: () => _editarLugar(docId, data),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    tooltip: 'Eliminar',
+                                    onPressed: () =>
+                                        _confirmarEliminarLugar(docId),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.reviews),
+                                    tooltip: 'Ver reseñas',
+                                    onPressed: () => _verResenas(docId),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF0e4c71),
+        foregroundColor: Colors.white, // Ícono blanco
+        tooltip: 'Añadir lugar turístico',
+        onPressed: () => _mostrarFormularioModal(context),
+        child: const Icon(Icons.add_location_alt),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    int maxLines = 1,
+    bool isNumber = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      maxLines: maxLines,
+      validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
     );
   }
 }

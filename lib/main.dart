@@ -4,9 +4,6 @@ import 'package:mi_supabase_flutter/tabs/visitante_tabs.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'login_page.dart';
-import 'publisher_page.dart';
-import 'visitor_page.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
