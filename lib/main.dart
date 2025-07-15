@@ -9,27 +9,39 @@ void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-
-  // Inicializa Supabase
-  await Supabase.initialize(
-    url: 'https://jqoabinjonqgedgbrryi.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxb2FiaW5qb25xZ2VkZ2JycnlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NTkzNDAsImV4cCI6MjA2NDAzNTM0MH0.Ixtfn8U6F8gC-g5zS9w2V2tqvRZwrnojoJSLcG5P2LU',
-  );
-
-  // Inicializa Firebase
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "AIzaSyBWJiYEAKabqS5IbNh2FQSdXAiqg48TO5k",
-      authDomain: "flutter-firebase-2e515.firebaseapp.com",
-      projectId: "flutter-firebase-2e515",
-      storageBucket: "flutter-firebase-2e515.appspot.com",
-      messagingSenderId: "31816417250",
-      appId: "1:31816417250:web:a37f2d45b25ae07ebfc3bb",
-      measurementId: "G-JYG08PBL2Q",
-    ),
-  );
-
+  try
+  {
+      // Inicializa Supabase
+    await Supabase.initialize(
+      url: 'https://jqoabinjonqgedgbrryi.supabase.co',
+      anonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxb2FiaW5qb25xZ2VkZ2JycnlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NTkzNDAsImV4cCI6MjA2NDAzNTM0MH0.Ixtfn8U6F8gC-g5zS9w2V2tqvRZwrnojoJSLcG5P2LU',
+    );
+  }
+  catch(e)
+  {
+    print(e);
+  }
+  
+  try
+  {
+    // Inicializa Firebase
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyBWJiYEAKabqS5IbNh2FQSdXAiqg48TO5k",
+        authDomain: "flutter-firebase-2e515.firebaseapp.com",
+        projectId: "flutter-firebase-2e515",
+        storageBucket: "flutter-firebase-2e515.appspot.com",
+        messagingSenderId: "31816417250",
+        appId: "1:31816417250:web:a37f2d45b25ae07ebfc3bb",
+        measurementId: "G-JYG08PBL2Q",
+      ),
+    );
+  }
+  catch(e)
+  {
+    print(e);
+  }
   runApp(const MyApp());
 }
 
@@ -105,18 +117,21 @@ class _AuthGateState extends State<AuthGate> {
 
     final String role = data?['role'] ?? '';
     if (role == 'publicador') {
+      FlutterNativeSplash.remove();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const PublicadorTabs()),
         (route) => false,
       );
     } else if (role == 'visitante') {
+      FlutterNativeSplash.remove();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const VisitanteTabs()),
         (route) => false,
       );
     } else {
+      FlutterNativeSplash.remove();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Rol desconocido o no asignado.')),
       );

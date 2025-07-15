@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -408,7 +407,10 @@ class _TurismosPageState extends State<TurismosPage> {
     fotosBytes.clear();
   }
 
-  void _mostrarModalImagen(String url, String lugarId) {
+  void _mostrarModalImagen(String url, String lugarId, bool esAutor) async {
+
+
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -429,6 +431,10 @@ class _TurismosPageState extends State<TurismosPage> {
                 ),
               ),
               const SizedBox(height: 12),
+              
+              !esAutor ? 
+              Text("")
+              :
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -1440,8 +1446,12 @@ class _TurismosPageState extends State<TurismosPage> {
                                   children: fotos.map((url) {
                                     return GestureDetector(
                                       onTap: () =>
-                                          _mostrarModalImagen(url, docId),
-                                      child: ClipRRect(
+                                          _mostrarModalImagen(url, docId, esCreador),
+                                      child: 
+                                      !esCreador ?
+                                      SizedBox.shrink()
+                                      :
+                                      ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
                                           url,

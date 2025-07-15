@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mi_supabase_flutter/tabs/publicador_tabs.dart';
 import 'package:mi_supabase_flutter/tabs/visitante_tabs.dart';
@@ -107,7 +106,9 @@ class _LoginPageState extends State<LoginPage> {
       body: Stack(
         children: [
           Positioned.fill(
+            
             child: Container(color: Color.fromARGB(255, 152, 183, 223)),
+            //child: Container(color: Color.fromARGB(255, 22, 36, 62)),
           ),
           Positioned.fill(
             child: Opacity(

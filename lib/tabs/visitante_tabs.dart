@@ -6,10 +6,10 @@ class VisitanteTabs extends StatefulWidget {
   const VisitanteTabs({super.key});
 
   @override
-  State<StatefulWidget> createState() => _visitanteTabsState();
+  State<StatefulWidget> createState() => _VisitanteTabsState();
 }
 
-class _visitanteTabsState extends State<VisitanteTabs> {
+class _VisitanteTabsState extends State<VisitanteTabs> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = 
