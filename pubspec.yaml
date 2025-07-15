@@ -20,6 +20,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   uuid: ^4.3.3
   flutter_svg: ^2.2.0
+  flutter_native_splash: ^2.4.6
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -34,3 +36,25 @@ flutter:
     - assets/images/arabesque.png
     - assets/images/arches.png
     - assets/images/logoApp.svg
+    - assets/resources/background.png
+    - assets/resources/res_normal_blanco.png
+
+
+
+flutter_native_splash:
+  color: "#16243e"
+  image: assets/resources/logo_done.png
+
+  android: true
+  ios: true
+  web: false
+
+  android_12:
+    color: "#16243e"
+    image: assets/resources/logo_done.png
+
+
+flutter_launcher_icons:
+  image_path: "assets/resources/icono_512.png"
+  android: true
+  ios: true

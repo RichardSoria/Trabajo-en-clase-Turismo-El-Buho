@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mi_supabase_flutter/tabs/publicador_tabs.dart';
 import 'package:mi_supabase_flutter/tabs/visitante_tabs.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'login_page.dart';
-
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+
+  // Inicializa Supabase
   await Supabase.initialize(
     url: 'https://jqoabinjonqgedgbrryi.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxb2FiaW5qb25xZ2VkZ2JycnlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0NTkzNDAsImV4cCI6MjA2NDAzNTM0MH0.Ixtfn8U6F8gC-g5zS9w2V2tqvRZwrnojoJSLcG5P2LU',
   );
 
+  // Inicializa Firebase
   await Firebase.initializeApp(
     options: const FirebaseOptions(
       apiKey: "AIzaSyBWJiYEAKabqS5IbNh2FQSdXAiqg48TO5k",
@@ -55,7 +59,13 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
+
     _checkSession();
+
+    // Remueve el splash solo cuando ya se haya chequeado la sesión (dentro de _checkSession)
+    // No lo removemos aquí directamente para evitar quitarlo antes de tiempo.
+
+    // Escucha cambios de sesión para navegar si se inicia sesión después
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
         _verificarYRedirigir();
@@ -63,13 +73,22 @@ class _AuthGateState extends State<AuthGate> {
     });
   }
 
-  void _checkSession() async {
+  Future<void> _checkSession() async {
+    await Future.delayed(const Duration(seconds: 1));
     final user = Supabase.instance.client.auth.currentUser;
+
     if (user != null) {
       await _verificarYRedirigir();
-    } else {
-      setState(() => _checkingSession = false);
     }
+
+    if (!mounted) return;
+
+    setState(() {
+      _checkingSession = false;
+    });
+
+    // Aquí quitamos el splash porque ya tenemos la UI lista para mostrar
+    FlutterNativeSplash.remove();
   }
 
   Future<void> _verificarYRedirigir() async {
@@ -101,19 +120,25 @@ class _AuthGateState extends State<AuthGate> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Rol desconocido o no asignado.')),
       );
+      setState(() {
+        _checkingSession = false;
+      });
+      FlutterNativeSplash.remove();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _checkingSession
-        ? const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
-              ),
-            ),
-          )
-        : const LoginPage();
+    if (_checkingSession) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF8AD25)),
+          ),
+        ),
+      );
+    }
+
+    return const LoginPage();
   }
 }

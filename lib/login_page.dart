@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mi_supabase_flutter/tabs/publicador_tabs.dart';
 import 'package:mi_supabase_flutter/tabs/visitante_tabs.dart';
@@ -19,7 +20,9 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   bool _cargando = false;
 
+
   void _showSnackBar(String message, {bool error = false}) {
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -118,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
             ),
           ),
-
+          /*
           Align(
             alignment: Alignment.topCenter,
             child: Container(
@@ -127,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.white,
               child: SvgPicture.asset("assets/images/logoApp.svg"),
             ),
-          ),
+          ),*/
           
           Expanded(
             flex: 2,
