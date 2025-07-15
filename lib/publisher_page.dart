@@ -61,13 +61,17 @@ class _TurismosPageState extends State<TurismosPage> {
 
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
-        if (fotosBytes.length < 5) {
+        if (fotosBytes.length < 6) {
           setModalState(() {
             fotosBytes.add(bytes);
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Máximo 5 imágenes permitidas.')),
+            const SnackBar(
+              content: Text('Máximo 6 imágenes permitidas.'),
+              backgroundColor: Color(0xFF16243e), // Azul institucional
+              behavior: SnackBarBehavior.floating,
+            ),
           );
         }
       }
@@ -78,7 +82,7 @@ class _TurismosPageState extends State<TurismosPage> {
         imageQuality: 100,
       );
 
-      if ((pickedFiles.length + fotosBytes.length) <= 5) {
+      if ((pickedFiles.length + fotosBytes.length) <= 6) {
         for (var pickedFile in pickedFiles) {
           final bytes = await pickedFile.readAsBytes();
           setModalState(() {
@@ -87,7 +91,11 @@ class _TurismosPageState extends State<TurismosPage> {
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Puedes subir entre 1 y 5 imágenes.')),
+          const SnackBar(
+            content: Text('Puedes subir entre 1 y 6 imágenes.'),
+            backgroundColor: Color(0xFF16243e), // Azul institucional
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -145,25 +153,30 @@ class _TurismosPageState extends State<TurismosPage> {
           title: const Text(
             'Campos incompletos',
             style: TextStyle(
-              color: Color(0xFF0e4c71),
+              color: Color(0xFF16243e), // Azul institucional
               fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
           content: const Text(
             'Por favor completa todos los campos obligatorios.',
-            style: TextStyle(fontSize: 15),
+            style: TextStyle(fontSize: 16, color: Colors.black87),
           ),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Color(0xFFF8AD25),
+                backgroundColor: Color(0xFFF8AD25), // Amarillo de atención
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: 20,
+                  vertical: 10,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(),
@@ -186,7 +199,7 @@ class _TurismosPageState extends State<TurismosPage> {
           title: const Text(
             'Faltan imágenes',
             style: TextStyle(
-              color: Color(0xFF0e4c71),
+              color: Color(0xFF16243e),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -215,6 +228,7 @@ class _TurismosPageState extends State<TurismosPage> {
       );
       return;
     }
+
     if (camposVacios) {
       showDialog(
         context: context,
@@ -226,25 +240,30 @@ class _TurismosPageState extends State<TurismosPage> {
           title: const Text(
             'Campos incompletos',
             style: TextStyle(
-              color: Color(0xFF0e4c71),
+              color: Color(0xFF16243e), // Azul institucional
               fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
           content: const Text(
             'Por favor completa todos los campos obligatorios.',
-            style: TextStyle(fontSize: 15),
+            style: TextStyle(fontSize: 16, color: Colors.black87),
           ),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Color(0xFFF8AD25),
+                backgroundColor: Color(0xFFF8AD25), // Amarillo institucional
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: 20,
+                  vertical: 10,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(),
@@ -267,25 +286,30 @@ class _TurismosPageState extends State<TurismosPage> {
           title: const Text(
             'Faltan imágenes',
             style: TextStyle(
-              color: Color(0xFF0e4c71),
+              color: Color(0xFF16243e), // Azul institucional
               fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
           content: const Text(
             'Debes agregar al menos una fotografía.',
-            style: TextStyle(fontSize: 15),
+            style: TextStyle(fontSize: 16, color: Colors.black87),
           ),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Color(0xFFF8AD25),
+                backgroundColor: Color(0xFFF8AD25), // Amarillo de atención
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: 20,
+                  vertical: 10,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(),
@@ -349,7 +373,11 @@ class _TurismosPageState extends State<TurismosPage> {
       _clearForm();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lugar turístico guardado exitosamente.')),
+        const SnackBar(
+          content: Text('Lugar turístico guardado exitosamente.'),
+          backgroundColor: Color(0xFF16243e), // Azul institucional
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } catch (e) {
       Navigator.pop(context); // Cierra el spinner
@@ -383,24 +411,71 @@ class _TurismosPageState extends State<TurismosPage> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.network(url, fit: BoxFit.cover),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _confirmarEliminarImagen(lugarId, url),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => _actualizarImagen(lugarId, url),
+                child: InteractiveViewer(
+                  minScale: 1,
+                  maxScale: 4,
+                  child: Image.network(url, fit: BoxFit.contain),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _confirmarEliminarImagen(lugarId, url);
+                    },
+                    icon: const Icon(Icons.delete, color: Colors.white),
+                    label: const Text('Eliminar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE72F2B),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await _actualizarImagen(lugarId, url);
+                    },
+                    icon: const Icon(Icons.image_search, color: Colors.white),
+                    label: const Text('Actualizar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF16243e),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );
@@ -417,25 +492,30 @@ class _TurismosPageState extends State<TurismosPage> {
             title: const Text(
               '¿Estás seguro?',
               style: TextStyle(
-                color: Color(0xFF0e4c71),
+                color: Color(0xFF16243e), // Azul institucional
                 fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
             ),
             content: const Text(
               '¿Deseas guardar este lugar turístico?',
-              style: TextStyle(fontSize: 15),
+              style: TextStyle(fontSize: 16, color: Colors.black87),
             ),
             actions: [
               TextButton(
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.black,
                   backgroundColor: Colors.grey.shade300,
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: 20,
+                    vertical: 10,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
                 onPressed: () => Navigator.pop(context, false),
@@ -443,14 +523,18 @@ class _TurismosPageState extends State<TurismosPage> {
               ),
               TextButton(
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Color(0xFFF8AD25),
+                  backgroundColor: Color(0xFFF8AD25), // Amarillo de atención
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: 20,
+                    vertical: 10,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
                 onPressed: () => Navigator.pop(context, true),
@@ -463,17 +547,53 @@ class _TurismosPageState extends State<TurismosPage> {
   }
 
   void _confirmarEliminarLugar(String id) async {
-    final confirmado = await showDialog(
+    final confirmado = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('¿Estás seguro?'),
-        content: const Text('Esta acción no se puede deshacer.'),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          '¿Estás seguro?',
+          style: TextStyle(
+            color: Color(0xFFE72F2B), // Rojo de alerta
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: const Text(
+          'Esta acción no se puede deshacer.',
+          style: TextStyle(fontSize: 16, color: Colors.black87),
+        ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey.shade300,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancelar'),
           ),
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Color(0xFFE72F2B), // Rojo de alerta
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Sí, eliminar'),
           ),
@@ -484,20 +604,66 @@ class _TurismosPageState extends State<TurismosPage> {
     if (confirmado == true) {
       await FirebaseFirestore.instance.collection('turismo').doc(id).delete();
     }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lugar eliminado exitosamente.'),
+          backgroundColor: Color(0xFF16243e), // Azul institucional
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
-  void _confirmarEliminarImagen(String lugarId, String url) async {
-    final confirmado = await showDialog(
+  Future<bool> _confirmarEliminarImagen(String lugarId, String url) async {
+    final confirmado = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Eliminar Imagen'),
-        content: const Text('¿Deseas eliminar esta imagen?'),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Eliminar Imagen',
+          style: TextStyle(
+            color: Color(0xFFE72F2B),
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: const Text(
+          '¿Deseas eliminar esta imagen?',
+          style: TextStyle(fontSize: 16, color: Colors.black87),
+        ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey.shade300,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancelar'),
           ),
           TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Color(0xFFE72F2B),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Sí, eliminar'),
           ),
@@ -526,7 +692,7 @@ class _TurismosPageState extends State<TurismosPage> {
         });
 
         Navigator.pop(context); // Cierra el spinner
-        Navigator.pop(context); // Cierra el modal de imagen
+        return true;
       } catch (e) {
         Navigator.pop(context); // Cierra el spinner
         ScaffoldMessenger.of(context).showSnackBar(
@@ -534,6 +700,8 @@ class _TurismosPageState extends State<TurismosPage> {
         );
       }
     }
+
+    return false;
   }
 
   Future<void> _agregarMasImagenes(String lugarId, int cantidadActual) async {
@@ -558,7 +726,7 @@ class _TurismosPageState extends State<TurismosPage> {
 
     if (origen == null) return;
 
-    final int cantidadDisponible = 5 - cantidadActual;
+    final int cantidadDisponible = 6 - cantidadActual;
     final storage = Supabase.instance.client.storage.from('turismo');
     final nuevasUrls = <String>[];
 
@@ -574,7 +742,11 @@ class _TurismosPageState extends State<TurismosPage> {
         if (pickedFile != null) {
           if (cantidadDisponible < 1) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Ya tienes 5 imágenes.')),
+              const SnackBar(
+                content: Text('Ya tienes 6 imágenes.'),
+                backgroundColor: Color(0xFF16243e), // Azul institucional
+                behavior: SnackBarBehavior.floating,
+              ),
             );
             return;
           }
@@ -608,7 +780,7 @@ class _TurismosPageState extends State<TurismosPage> {
         final pickedFiles = await picker.pickMultiImage(
           maxWidth: 1024,
           maxHeight: 1024,
-          imageQuality: 85,
+          imageQuality: 100,
         );
 
         if (pickedFiles.isEmpty) return;
@@ -720,6 +892,7 @@ class _TurismosPageState extends State<TurismosPage> {
             .collection('turismo')
             .doc(lugarId);
 
+        // Reemplaza la imagen antigua por la nueva
         await doc.update({
           'fotografias': FieldValue.arrayRemove([urlAntiguo]),
         });
@@ -730,7 +903,7 @@ class _TurismosPageState extends State<TurismosPage> {
       }
 
       Navigator.pop(context); // Cierra el spinner
-      Navigator.pop(context); // Cierra el modal de imagen
+      // No cierres el modal de imagen aquí, déjalo al botón si es necesario
     } catch (e) {
       Navigator.pop(context); // Cierra el spinner
       ScaffoldMessenger.of(context).showSnackBar(
@@ -751,41 +924,105 @@ class _TurismosPageState extends State<TurismosPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Editar Lugar'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildTextField(nombreCtrl, 'Nombre del Lugar'),
-                const SizedBox(height: 8),
-                _buildTextField(descripcionCtrl, 'Descripción', maxLines: 2),
-                const SizedBox(height: 8),
-                _buildTextField(latCtrl, 'Latitud', isNumber: true),
-                const SizedBox(height: 8),
-                _buildTextField(lngCtrl, 'Longitud', isNumber: true),
-                const SizedBox(height: 8),
-                _buildTextField(provinciaCtrl, 'Provincia'),
-                const SizedBox(height: 8),
-                _buildTextField(ciudadCtrl, 'Ciudad'),
-              ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Editar Lugar',
+          style: TextStyle(
+            color: Color(0xFF16243e),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: SizedBox(
+          width: 500, // <-- Aquí defines el ancho deseado
+          child: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _styledField(nombreCtrl, 'Nombre del Lugar'),
+                  const SizedBox(height: 10),
+                  _styledField(descripcionCtrl, 'Descripción', maxLines: 2),
+                  const SizedBox(height: 10),
+                  _styledField(latCtrl, 'Latitud', isNumber: true),
+                  const SizedBox(height: 10),
+                  _styledField(lngCtrl, 'Longitud', isNumber: true),
+                  const SizedBox(height: 10),
+                  _styledField(provinciaCtrl, 'Provincia'),
+                  const SizedBox(height: 10),
+                  _styledField(ciudadCtrl, 'Ciudad'),
+                ],
+              ),
             ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(
+                color: Color(0xFFE72F2B), // Rojo de alerta
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
+            icon: const Icon(
+              Icons.edit,
+            ), // Ícono más representativo para editar
+            label: const Text('Actualizar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF16243e), // Azul institucional
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             onPressed: () async {
-              final isValid = formKey.currentState!.validate();
+              final campos = [
+                nombreCtrl.text,
+                descripcionCtrl.text,
+                latCtrl.text,
+                lngCtrl.text,
+                provinciaCtrl.text,
+                ciudadCtrl.text,
+              ];
 
-              if (!isValid) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Por favor completa todos los campos.'),
+              final camposVacios = campos.any((campo) => campo.trim().isEmpty);
+
+              if (camposVacios) {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: const Text(
+                      'Campos incompletos',
+                      style: TextStyle(
+                        color: Color(0xFFE72F2B),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    content: const Text(
+                      'Por favor completa todos los campos.',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text(
+                          'Aceptar',
+                          style: TextStyle(
+                            color: Color(0xFF16243e),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
                 return;
@@ -794,67 +1031,90 @@ class _TurismosPageState extends State<TurismosPage> {
               final confirmado = await showDialog<bool>(
                 context: context,
                 builder: (_) => AlertDialog(
-                  title: const Text('¿Confirmar actualización?'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: const Text(
+                    '¿Confirmar actualización?',
+                    style: TextStyle(
+                      color: Color(0xFF16243e), // Azul institucional
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                   content: const Text(
                     '¿Estás seguro de actualizar este lugar turístico?',
+                    style: TextStyle(fontSize: 16),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('No'),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          color: Color(0xFFE72F2B), // Rojo de alerta
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Sí, actualizar'),
+                      child: const Text(
+                        'Sí, actualizar',
+                        style: TextStyle(
+                          color: Color(0xFF16243e), // Azul institucional
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               );
 
-              if (confirmado == true) {
-                // Mostrar spinner mientras se actualiza
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFFF8AD25),
-                      ),
+              if (confirmado != true) return;
+
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFFF8AD25),
                     ),
                   ),
+                ),
+              );
+
+              try {
+                await FirebaseFirestore.instance
+                    .collection('turismo')
+                    .doc(id)
+                    .update({
+                      'nombre': nombreCtrl.text,
+                      'descripcion': descripcionCtrl.text,
+                      'latitud': double.tryParse(latCtrl.text) ?? 0,
+                      'longitud': double.tryParse(lngCtrl.text) ?? 0,
+                      'provincia': provinciaCtrl.text,
+                      'ciudad': ciudadCtrl.text,
+                    });
+
+                Navigator.pop(context); // spinner
+                Navigator.pop(context); // modal
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Lugar actualizado exitosamente.'),
+                    backgroundColor: Color(0xFF16243e), // Azul institucional
+                    behavior: SnackBarBehavior.floating,
+                  ),
                 );
-
-                try {
-                  await FirebaseFirestore.instance
-                      .collection('turismo')
-                      .doc(id)
-                      .update({
-                        'nombre': nombreCtrl.text,
-                        'descripcion': descripcionCtrl.text,
-                        'latitud': double.tryParse(latCtrl.text) ?? 0,
-                        'longitud': double.tryParse(lngCtrl.text) ?? 0,
-                        'provincia': provinciaCtrl.text,
-                        'ciudad': ciudadCtrl.text,
-                      });
-
-                  Navigator.pop(context); // Cierra spinner
-                  Navigator.pop(context); // Cierra modal de edición
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lugar actualizado exitosamente.'),
-                    ),
-                  );
-                } catch (e) {
-                  Navigator.pop(context); // Cierra spinner
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error al actualizar: $e')),
-                  );
-                }
+              } catch (e) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error al actualizar: $e')),
+                );
               }
             },
-            child: const Text('Actualizar'),
           ),
         ],
       ),
@@ -1030,7 +1290,7 @@ class _TurismosPageState extends State<TurismosPage> {
                       icon: const Icon(Icons.save),
                       label: const Text('Guardar Lugar'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0e4c71),
+                        backgroundColor: const Color(0xFF16243e),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
@@ -1167,10 +1427,15 @@ class _TurismosPageState extends State<TurismosPage> {
                               _infoText("Publicado por: ", autor, italic: true),
                               const SizedBox(height: 12),
 
-                              if (fotos.isNotEmpty)
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
+                              SizedBox(
+                                height:
+                                    (fotos.length / 3).ceil() *
+                                    110, // 3 por fila, 100 alto + 10 spacing
+                                child: GridView.count(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                  physics: const NeverScrollableScrollPhysics(),
                                   children: fotos.map((url) {
                                     return GestureDetector(
                                       onTap: () =>
@@ -1179,25 +1444,36 @@ class _TurismosPageState extends State<TurismosPage> {
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
                                           url,
-                                          width: 100,
-                                          height: 100,
                                           fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Container(
+                                                  color: Colors.grey[300],
+                                                  child: const Icon(
+                                                    Icons.broken_image,
+                                                    color: Colors.red,
+                                                  ),
+                                                );
+                                              },
                                         ),
                                       ),
                                     );
                                   }).toList(),
                                 ),
+                              ),
 
                               const SizedBox(height: 8),
 
-                              if (esCreador && fotos.length < 5)
+                              if (esCreador && fotos.length < 6)
                                 TextButton.icon(
                                   onPressed: () =>
                                       _agregarMasImagenes(docId, fotos.length),
                                   icon: const Icon(Icons.add_a_photo),
                                   label: const Text('Agregar imagen'),
                                   style: TextButton.styleFrom(
-                                    foregroundColor: const Color(0xFF0e4c71),
+                                    foregroundColor: const Color(0xFF16243e),
                                   ),
                                 ),
 
@@ -1217,7 +1493,7 @@ class _TurismosPageState extends State<TurismosPage> {
                                       style: ButtonStyle(
                                         backgroundColor:
                                             WidgetStateProperty.all(
-                                              Color(0xFF0e4c71),
+                                              Color(0xFF16243e),
                                             ),
                                       ),
                                     ),
@@ -1242,7 +1518,7 @@ class _TurismosPageState extends State<TurismosPage> {
                                     color: Colors.white,
                                     style: ButtonStyle(
                                       backgroundColor: WidgetStateProperty.all(
-                                        Color(0xFF0e4c71),
+                                        Color(0xFF16243e),
                                       ),
                                     ),
                                   ),
@@ -1262,7 +1538,7 @@ class _TurismosPageState extends State<TurismosPage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF0e4c71),
+        backgroundColor: const Color(0xFF16243e),
         foregroundColor: Colors.white, // Ícono blanco
         tooltip: 'Añadir lugar turístico',
         onPressed: () => _mostrarFormularioModal(context),
