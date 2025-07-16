@@ -159,9 +159,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),*/
           
-          Expanded(
-            flex: 2,
-            child: Center(
+            Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Card(
@@ -241,7 +239,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-          )
         ]
       )
     );
