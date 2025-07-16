@@ -131,6 +131,7 @@ class _AuthGateState extends State<AuthGate> {
         (route) => false,
       );
     } else {
+      // ???
       FlutterNativeSplash.remove();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Rol desconocido o no asignado.')),
@@ -138,7 +139,6 @@ class _AuthGateState extends State<AuthGate> {
       setState(() {
         _checkingSession = false;
       });
-      FlutterNativeSplash.remove();
     }
   }
 

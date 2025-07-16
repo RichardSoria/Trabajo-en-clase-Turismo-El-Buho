@@ -109,10 +109,29 @@ class _PublisherProfilePageState extends State<PublisherProfilePage> {
 
   Future<void> deleteUserAccount() async {
     try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+
+      if (userId == null)
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: 
+          Text("Su sesión no existe"))
+        );
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+
+        return;
+      }
+
       await supabase
-          .from('users')
-          .delete()
-          .eq('id', '${supabase.auth.currentUser?.id}');
+      .from('users')
+      .update({'deleted': true})
+      .eq('id', userId);
+
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -246,7 +265,7 @@ class _PublisherProfilePageState extends State<PublisherProfilePage> {
                     actions: [
                       ElevatedButton(
                         onPressed: () {
-                          // Lógica eliminar
+                          deleteUserAccount();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFE72F2B),

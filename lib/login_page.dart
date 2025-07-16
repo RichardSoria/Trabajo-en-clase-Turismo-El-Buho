@@ -43,6 +43,28 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _cargando = true);
 
     try {
+      final estadoUsuario = await supabase.from("users")
+      .select('deleted')
+      .eq('email', emailController.text)
+      .single();
+
+      print(estadoUsuario);
+      if (estadoUsuario['deleted'] == true)
+      {
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: 
+          Text("No existe ese usuario"))
+        );
+      
+        setState(() {
+        _cargando = false;  
+        });
+        emailController.clear();
+        passwordController.clear();
+        return;
+      }
+
       final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
@@ -85,6 +107,9 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       _showSnackBar('Error: $e', error: true);
+      setState(() {
+        _cargando = false;
+      });
     } finally {
 
       //Salía error, porque el navigator ejecutado en el try elimina el contexto, y al hacerlo

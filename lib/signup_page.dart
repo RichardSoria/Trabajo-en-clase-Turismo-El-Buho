@@ -54,6 +54,33 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() => _cargando = true);
 
     try {
+      final ususarioRegistrado = await supabase.from("users")
+      .select("deleted")
+      .eq("email", emailController.text)
+      .maybeSingle();
+
+      if (ususarioRegistrado?['deleted'] == true)
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: 
+          Text("Esta cuenta no se puede volver a registrar"))
+        );
+
+        setState(() {
+          _cargando = false;
+        });
+
+        emailController.clear();
+        passwordController.clear();
+        //selectedRole
+        nameController.clear();
+        lastNameController.clear();
+
+        return;
+      }
+
+     
+      
       final response = await supabase.auth.signUp(
         email: emailController.text,
         password: passwordController.text,
@@ -62,6 +89,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
       final user = response.user;
 
+
+
       if (user != null) {
         await supabase.from('users').insert({
           'id': user.id,
@@ -69,6 +98,7 @@ class _SignUpPageState extends State<SignUpPage> {
           'role': selectedRole,
           'name': nameController.text,
           'lastName': lastNameController.text,
+          'deleted': false
         });
 
         _showSnackBar('Revisa tu correo para confirmar tu cuenta.');
@@ -101,9 +131,9 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Registrarse - El Búho'),
+        title: const Text('Registrarse - El Búho', style: TextStyle(color: Colors.white),),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Color.fromARGB(255, 225, 31, 28),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -121,7 +151,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   const Icon(
                     Icons.person_add,
                     size: 80,
-                    color: Colors.deepPurple,
+                    color: Color.fromARGB(255, 225, 31, 28),
                   ),
                   const SizedBox(height: 16),
 
@@ -205,7 +235,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           icon: const Icon(Icons.app_registration),
                           label: const Text('Registrarse'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: Color.fromARGB(255, 225, 31, 28),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
@@ -225,7 +255,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         MaterialPageRoute(builder: (_) => const LoginPage()),
                       );
                     },
-                    child: const Text('Iniciar sesión'),
+                    child: const Text('Iniciar sesión', style: TextStyle(color: Color.fromARGB(255, 225, 31, 28)),),
                   ),
                 ],
               ),
