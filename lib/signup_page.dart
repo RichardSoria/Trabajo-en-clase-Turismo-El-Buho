@@ -133,7 +133,7 @@ class _SignUpPageState extends State<SignUpPage> {
       appBar: AppBar(
         title: const Text('Registrarse - El Búho', style: TextStyle(color: Colors.white),),
         centerTitle: true,
-        backgroundColor: Color.fromARGB(255, 225, 31, 28),
+        backgroundColor: Color.fromARGB(255, 22, 36, 62),
       ),
       body: Center(
         child: SingleChildScrollView(

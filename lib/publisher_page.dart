@@ -1448,9 +1448,7 @@ class _TurismosPageState extends State<TurismosPage> {
                                       onTap: () =>
                                           _mostrarModalImagen(url, docId, esCreador),
                                       child: 
-                                      !esCreador ?
-                                      SizedBox.shrink()
-                                      :
+                                      
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(

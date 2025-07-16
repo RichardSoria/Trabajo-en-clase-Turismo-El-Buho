@@ -180,7 +180,7 @@ class _PublisherProfilePageState extends State<PublisherProfilePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F8),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0e4c71),
+        backgroundColor: const Color.fromARGB(255, 22, 36, 62),
         foregroundColor: Colors.white,
         title: const Text("Perfil de publicador"),
         actions: [

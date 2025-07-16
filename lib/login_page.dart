@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
       .eq('email', emailController.text)
       .single();
 
-      print(estadoUsuario);
+      
       if (estadoUsuario['deleted'] == true)
       {
         
@@ -104,6 +104,9 @@ class _LoginPageState extends State<LoginPage> {
         }
       } else {
         _showSnackBar('Credenciales incorrectas.', error: true);
+        setState(() {
+          _cargando = false;
+        });
       }
     } catch (e) {
       _showSnackBar('Error: $e', error: true);
@@ -131,13 +134,11 @@ class _LoginPageState extends State<LoginPage> {
       body: Stack(
         children: [
           Positioned.fill(
-            
-            child: Container(color: Color.fromARGB(255, 152, 183, 223)),
-            //child: Container(color: Color.fromARGB(255, 22, 36, 62)),
+            child: Container(color: Color.fromARGB(255, 22, 36, 62)),
           ),
           Positioned.fill(
             child: Opacity(
-              opacity: 0.40,
+              opacity: 1,
               child: Image.asset(
                 //"assets/images/always-grey.png",
                 "assets/images/arabesque.png",
